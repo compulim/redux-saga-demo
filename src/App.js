@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import addItem from './redux/action/addItem';
 
-function App() {
+function App({ onAddItem, items, now }) {
+  const [text, setText] = useState('');
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <form
+      onSubmit={ event => {
+        event.preventDefault();
+
+        const trimmedText = text.trim();
+
+        if (trimmedText) {
+          onAddItem(text);
+          setText('');
+        }
+      } }
+    >
+      <div>{ new Date(now).toString() }</div>
+      <ul>
+        {
+          items.map(({ text }) =>
+            <li>{ text }</li>
+          )
+        }
+      </ul>
+      <input
+        autoFocus={ true }
+        onChange={ ({ target: { value } }) => setText(value) }
+        value={ text }
+      />
+      <button
+        type="button"
+      >
+        Add
+      </button>
+    </form>
   );
 }
 
-export default App;
+export default connect(
+  ({
+    clock: { now },
+    items
+  }) => ({
+    items,
+    now
+  }),
+  dispatch => ({
+    onAddItem: text => dispatch(addItem(text))
+  })
+)(App)
